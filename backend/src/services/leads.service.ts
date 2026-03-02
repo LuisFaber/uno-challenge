@@ -75,6 +75,8 @@ export async function getAllLeads(options: GetLeadsOptions = {}): Promise<GetLea
 
   const cappedLimit = Math.min(Math.max(1, limit), 50);
   const offset = (Math.max(1, page) - 1) * cappedLimit;
+  const limitVal = Math.floor(cappedLimit);
+  const offsetVal = Math.floor(Math.max(0, offset));
 
   const [countRows] = await pool.execute<RowDataPacket[]>(
     `SELECT COUNT(*) as total FROM leads${where}`,
@@ -83,8 +85,8 @@ export async function getAllLeads(options: GetLeadsOptions = {}): Promise<GetLea
   const total = Number((countRows[0] as { total: number }).total);
 
   const [rows] = await pool.execute<LeadRow[]>(
-    `SELECT id, contactId, name, company, status, createdAt FROM leads${where}${orderClause} LIMIT ? OFFSET ?`,
-    [...params, cappedLimit, offset]
+    `SELECT id, contactId, name, company, status, createdAt FROM leads${where}${orderClause} LIMIT ${limitVal} OFFSET ${offsetVal}`,
+    params
   );
 
   return {
@@ -126,8 +128,8 @@ export async function updateLead(
   data: LeadInput
 ): Promise<Lead | null> {
   const [result] = await pool.execute<ResultSetHeader>(
-    "UPDATE leads SET name = ?, company = ?, status = ? WHERE id = ?",
-    [data.name, data.company, data.status, id]
+    "UPDATE leads SET contactId = ?, name = ?, company = ?, status = ? WHERE id = ?",
+    [data.contactId, data.name, data.company, data.status, id]
   );
   if (result.affectedRows === 0) return null;
   const [rows] = await pool.execute<LeadRow[]>(

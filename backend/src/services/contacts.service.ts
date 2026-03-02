@@ -36,7 +36,29 @@ export async function getAllContacts(search?: string): Promise<Contact[]> {
   return rows.map(rowToContact);
 }
 
+export class DuplicateContactError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DuplicateContactError";
+  }
+}
+
 export async function createContact(data: ContactInput): Promise<Contact> {
+  const [byEmail] = await pool.execute<ContactRow[]>(
+    "SELECT id FROM contacts WHERE LOWER(email) = LOWER(?)",
+    [data.email]
+  );
+  if (byEmail.length > 0) {
+    throw new DuplicateContactError("A contact with this email already exists.");
+  }
+  const [byPhone] = await pool.execute<ContactRow[]>(
+    "SELECT id FROM contacts WHERE phone = ?",
+    [data.phone]
+  );
+  if (byPhone.length > 0) {
+    throw new DuplicateContactError("A contact with this phone already exists.");
+  }
+
   const id = crypto.randomUUID();
   const createdAt = new Date();
   await pool.execute(
@@ -56,6 +78,21 @@ export async function updateContact(
   id: string,
   data: ContactInput
 ): Promise<Contact | null> {
+  const [byEmail] = await pool.execute<ContactRow[]>(
+    "SELECT id FROM contacts WHERE LOWER(email) = LOWER(?) AND id != ?",
+    [data.email, id]
+  );
+  if (byEmail.length > 0) {
+    throw new DuplicateContactError("A contact with this email already exists.");
+  }
+  const [byPhone] = await pool.execute<ContactRow[]>(
+    "SELECT id FROM contacts WHERE phone = ? AND id != ?",
+    [data.phone, id]
+  );
+  if (byPhone.length > 0) {
+    throw new DuplicateContactError("A contact with this phone already exists.");
+  }
+
   const [result] = await pool.execute<ResultSetHeader>(
     "UPDATE contacts SET name = ?, email = ?, phone = ? WHERE id = ?",
     [data.name, data.email, data.phone, id]

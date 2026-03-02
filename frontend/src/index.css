@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ONE CRM — Paleta em camadas: creme moca, verde floresta, laranja */
+:root {
+  /* Fundo da página — creme moca suave e texturizado */
+  --mocha-bg: #EDE8E1;
+  --mocha-bg-subtle: #E8E2D9;
+  /* Card — manteiga clara (destaque sobre o fundo) */
+  --mocha-card: #FBF8F4;
+  /* Cabeçalho — marrom café escuro */
+  --nav-brown: #3D2E26;
+  --nav-brown-border: #4A3830;
+  /* Creme para texto em fundos escuros e abas inativas */
+  --cream: #F5F0E8;
+  --cream-soft: #E8E2D8;
+  /* Verdes */
+  --green-forest: #2D5A45;
+  --green-forest-hover: #244736;
+  --green-forest-band: #2D5A45;
+  --green-vibrant: #4A9B6D;
+  /* Marrons / Terracota */
+  --terracota-dark: #4A3528;
+  --terracota-soft: #6B5344;
+  --mocha-medium: #5C4A3D;
+  --mocha-icon: #6B5344;
+  --mocha-icon-hover: #4A3528;
+  --terracota-border: #8B6B4F;
+  /* Laranja */
+  --orange-burnt: #C45C2A;
+  --orange-burnt-hover: #A84E22;
+  --orange-focus: #D4693A;
+  /* Bordas */
+  --mocha-border: #DFD6CC;
+  --mocha-border-card: #E5DDD4;
+  --mocha-border-input: #D4CBC0;
+  --mocha-cell: #E0D9D0;
+  /* Tabela — zebra e hover */
+  --table-row-cream: #F8F5F0;
+  --table-row-mocha: #F2EDE6;
+  --table-row-hover: #EDE8E1;
+  /* Avatar */
+  --avatar-bg: #2D5A45;
+  --avatar-text: #F5F0E8;
+  /* Perigo / delete terracota sutil */
+  --danger: #A84838;
+  --danger-hover: #8E2F2F;
+}
+
+body {
+  background-color: var(--mocha-bg);
+  background-image: radial-gradient(var(--mocha-border) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--terracota-dark);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: "rlig" 1, "calt" 1;
+  letter-spacing: -0.01em;
+  line-height: 1.625;
+}
