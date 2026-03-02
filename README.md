@@ -1,140 +1,137 @@
-# Teste Técnico
+# ONE CRM
 
-## 🎯 Desafio: Mini CRM de Leads
-
-Você deve construir uma aplicação fullstack para gerenciamento de **leads** e seus **contatos**, composta por uma **API REST** e uma **interface web**.
-
-**Prazo de entrega: 3 dias**
+Mini CRM para gerenciamento de contatos e oportunidades comerciais (leads).
 
 ---
 
-## 📋 Requisitos Obrigatórios
+## Como rodar
 
-### API (Hono + TypeScript)
+### Pré-requisito
 
-#### Contatos
+- [Docker](https://www.docker.com/) instalado e rodando.
 
-- [ ] **GET /contacts** - Listar contatos
-  - Query param `search`: filtra por nome ou email (case insensitive)
-- [ ] **POST /contacts** - Criar novo contato
-  - Validação de dados com Zod
-  - Retornar erro 400 se dados inválidos
-- [ ] **PUT /contacts/:id** - Atualizar contato existente
-  - Validação de dados com Zod
-  - Retornar erro 400 se dados inválidos
+### Subir o projeto
 
-#### Leads
+Na raiz do repositório, execute:
 
-- [ ] **GET /leads** - Listar leads
-  - Query param `search`: filtra por nome ou empresa (case insensitive)
-  - Query param `status`: filtra por status (`novo`, `contactado`, `qualificado`, `convertido`, `perdido`)
-- [ ] **POST /leads** - Criar novo lead (vinculado a um contato via `contactId`)
-  - Validação de dados com Zod
-  - Retornar erro 400 se dados inválidos
-- [ ] **PUT /leads/:id** - Atualizar lead existente
-  - Validação de dados com Zod
-  - Retornar erro 400 se dados inválidos
-- [ ] **GET /contacts/:contactId/leads** - Listar leads de um contato específico
+```bash
+docker compose up --build
+```
 
-### Frontend (React + TypeScript)
+Isso irá subir automaticamente:
 
-- [ ] Listagem de leads em tabela
-- [ ] Campo de busca por nome/empresa
-- [ ] Filtro por status (dropdown, tabs ou botões)
-- [ ] Formulário para criar novo lead (selecionando um contato existente)
-- [ ] Listagem de contatos
-- [ ] Formulário para criar novo contato
-- [ ] Visualização dos leads vinculados a um contato
-- [ ] Feedback visual de loading e erro
+| Serviço    | URL                        |
+|------------|----------------------------|
+| Frontend   | http://localhost:5173       |
+| API (REST) | http://localhost:3000       |
+| MySQL      | `localhost:3306`            |
+
+Acesse o sistema em **http://localhost:5173**.
+
+> Na primeira execução o banco de dados é criado e populado automaticamente. Se o container da API iniciar antes do MySQL estar pronto, ele tentará reconectar automaticamente.
 
 ---
 
-## 📦 Modelo de Dados
+## Funcionalidades
 
-```typescript
-interface Contact {
-  id: string
-  name: string
-  email: string
-  phone: string
-  createdAt: string // ISO date
+### Contatos
+
+- Listar, criar, editar e excluir contatos.
+- Busca por nome ou e-mail.
+- Ordenação por data de criação ou nome.
+- Paginação.
+
+### Leads
+
+- Listar, criar, editar e excluir leads.
+- Cada lead está vinculado a um contato existente.
+- Filtro por status e busca por nome ou empresa.
+- Ordenação por data de criação ou nome.
+- Paginação.
+- Ação de "Ir para contato" na tabela: redireciona para a página de Contatos com a busca preenchida automaticamente.
+
+### Status dos leads
+
+| Status      | Descrição                              |
+|-------------|----------------------------------------|
+| `novo`      | Lead recém-criado                      |
+| `contactado`| Contato feito com o lead               |
+| `qualificado`| Lead qualificado para negociação      |
+| `convertido`| Negócio fechado                        |
+| `perdido`   | Oportunidade perdida                   |
+
+---
+
+## Estrutura do projeto
+
+```
+uno-challenge/
+├── backend/          # API REST (Node.js + Hono + MySQL)
+│   └── src/
+│       ├── controllers/
+│       ├── services/
+│       ├── routes/
+│       ├── schemas/  # validação com Zod
+│       ├── types/
+│       └── db/       # conexão e inicialização do banco
+├── frontend/         # SPA (React + Vite + Tailwind CSS)
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── services/ # chamadas à API
+│       └── types/
+└── docker-compose.yml
+```
+
+---
+
+## Endpoints da API
+
+### Contatos — `/contacts`
+
+| Método | Rota                     | Descrição                             |
+|--------|--------------------------|---------------------------------------|
+| GET    | `/contacts`              | Lista contatos (suporta `?search=`)   |
+| POST   | `/contacts`              | Cria um contato                       |
+| PUT    | `/contacts/:id`          | Atualiza um contato                   |
+| DELETE | `/contacts/:id`          | Remove um contato                     |
+| GET    | `/contacts/:id/leads`    | Lista leads de um contato             |
+
+**Corpo para criar/atualizar contato:**
+```json
+{
+  "name": "Maria Silva",
+  "email": "maria@exemplo.com",
+  "phone": "(11) 91234-5678"
 }
+```
 
-interface Lead {
-  id: string
-  contactId: string // referência ao contato (Contact.id)
-  name: string
-  company: string
-  status: 'novo' | 'contactado' | 'qualificado' | 'convertido' | 'perdido'
-  createdAt: string // ISO date
+### Leads — `/leads`
+
+| Método | Rota          | Descrição                                                         |
+|--------|---------------|-------------------------------------------------------------------|
+| GET    | `/leads`      | Lista leads (suporta `?search`, `?status`, `?page`, `?limit`, `?orderBy`, `?order`) |
+| POST   | `/leads`      | Cria um lead                                                      |
+| PUT    | `/leads/:id`  | Atualiza um lead                                                  |
+| DELETE | `/leads/:id`  | Remove um lead                                                    |
+
+**Corpo para criar/atualizar lead:**
+```json
+{
+  "contactId": "uuid-do-contato",
+  "name": "João Leads",
+  "company": "Empresa XYZ",
+  "status": "novo"
 }
 ```
 
-### Relacionamento
-
-- Um **Contact** pode ter N **Leads** (1:N)
-- Todo **Lead** pertence a um **Contact** (via `contactId`)
-
-### Validações para criação de Contato:
-
-- `name`: obrigatório, mínimo 2 caracteres
-- `email`: obrigatório, formato de email válido
-- `phone`: obrigatório
-
-### Validações para criação de Lead:
-
-- `contactId`: obrigatório, deve referenciar um contato existente
-- `name`: obrigatório, mínimo 2 caracteres
-- `company`: obrigatório, mínimo 2 caracteres
-- `status`: obrigatório, deve ser um dos valores permitidos
-
 ---
 
-## ⭐ Diferenciais (não obrigatórios)
+## Stack
 
-- Paginação na listagem de leads
-- Edição de lead existente
-- Edição de contato existente
-- Remoção de lead (com confirmação)
-- Remoção de contato (com confirmação)
-- Ordenação por nome ou data
-- Testes unitários
-- Responsividade
-
----
-
-## 🛠️ Stack
-
-- **API**: Hono, TypeScript, Zod
-- **Frontend**: React, TypeScript
-- **Estilização**: Livre (CSS, Tailwind, styled-components, etc.)
-- **Persistência**: Em memória (array) - não precisa de banco de dados
-
----
-
-## 📂 Estrutura do Projeto
-
-```
-crm/
-├── api/          # Backend Hono
-├── web/          # Frontend React
-└── README.md     # Este arquivo
-```
-
----
-
-## 📤 Entrega
-
-1. Suba o código em um repositório Git (GitHub, GitLab, etc.)
-2. Inclua um README com instruções para rodar o projeto
-3. Envie o link do repositório
-
----
-
-## ❓ Dúvidas
-
-Se tiver qualquer dúvida sobre os requisitos, entre em contato pelo whatsapp: **(47) 93300-8369**
-
-Boa sorte! 🚀
-
----
+| Camada    | Tecnologia                              |
+|-----------|-----------------------------------------|
+| Frontend  | React 18, Vite, Tailwind CSS, TypeScript |
+| Backend   | Node.js 20, Hono, TypeScript            |
+| Banco     | MySQL 8                                 |
+| Containers| Docker + Docker Compose                 |
