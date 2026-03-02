@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { initDatabase } from "./db/init.js";
 import { contacts } from "./routes/contacts.routes.js";
+import { leads } from "./routes/leads.routes.js";
 
 const app = new Hono();
 
@@ -11,6 +12,7 @@ app.get("/", (c) => {
 });
 
 app.route("/contacts", contacts);
+app.route("/leads", leads);
 
 async function main() {
   const maxAttempts = 10;
