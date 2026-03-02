@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as api from "../services/api";
 import type { Contact } from "../types/contact";
@@ -10,6 +11,7 @@ import Select, { type SelectOption } from "../components/ui/Select";
 const LIMIT = 5;
 
 export default function ContactsPage() {
+  const [searchParams] = useSearchParams();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -43,6 +45,24 @@ export default function ContactsPage() {
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
+
+  const contactIdFromUrl = searchParams.get("contactId");
+
+  useEffect(() => {
+    if (!contactIdFromUrl) return;
+    let cancelled = false;
+    api.getContacts().then((list) => {
+      if (cancelled) return;
+      const contact = list.find((c) => c.id === contactIdFromUrl);
+      if (contact?.email) {
+        setSearch(contact.email);
+        setDebouncedSearch(contact.email);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [contactIdFromUrl]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);

@@ -9,22 +9,29 @@ export interface SelectOption {
 
 interface SelectProps {
   label?: string;
+  labelClassName?: string;
   options: SelectOption[];
   value: SelectOption;
   onChange: (option: SelectOption) => void;
+  fullWidth?: boolean;
 }
 
-export default function Select({ label, options, value, onChange }: SelectProps) {
+export default function Select({ label, labelClassName, options, value, onChange, fullWidth }: SelectProps) {
+  const labelClass = labelClassName ?? "text-sm font-medium text-terracota-dark";
+  const rootClass = fullWidth
+    ? "relative w-full flex flex-col gap-1.5"
+    : "relative inline-block w-56 flex flex-col gap-1.5";
+
   return (
     <Listbox value={value} onChange={onChange}>
-      <div className="relative inline-block w-56 flex flex-col gap-1.5">
+      <div className={rootClass}>
         {label && (
-          <Listbox.Label className="text-sm font-medium text-terracota-dark">
+          <Listbox.Label className={labelClass}>
             {label}
           </Listbox.Label>
         )}
 
-        <Listbox.Button className="relative w-full min-w-[200px] h-11 bg-mocha-card border border-mocha-border-input rounded-xl px-4 py-2.5 text-left text-sm text-mocha-medium shadow-input-inner transition focus:outline-none focus:ring-2 focus:ring-orange-focus focus:border-orange-focus hover:border-mocha-icon cursor-pointer flex items-center box-border">
+        <Listbox.Button className="relative w-full h-11 min-h-[44px] bg-mocha-card border border-mocha-border-input rounded-xl px-4 py-2.5 text-left text-sm text-mocha-medium shadow-input-inner transition focus:outline-none focus:ring-2 focus:ring-orange-focus focus:border-orange-focus hover:border-mocha-icon cursor-pointer flex items-center box-border">
           <span className="block whitespace-nowrap pr-8">{value.label}</span>
           <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
             <ChevronUpDownIcon className="h-4 w-4 text-mocha-icon" aria-hidden="true" />
