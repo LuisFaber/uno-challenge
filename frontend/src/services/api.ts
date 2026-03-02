@@ -1,35 +1,50 @@
+import type { Contact } from "../types/contact";
+
 const API_URL = "http://localhost:3000";
 
-export async function getContacts(): Promise<unknown> {
-  const res = await fetch(`${API_URL}/contacts`);
+export async function getContacts(search?: string): Promise<Contact[]> {
+  const url = search ? `${API_URL}/contacts?search=${encodeURIComponent(search)}` : `${API_URL}/contacts`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch contacts");
   return res.json();
 }
 
-export async function createContact(_body: unknown): Promise<unknown> {
+export type CreateContactData = Pick<Contact, "name" | "email" | "phone">;
+
+const ERROR_MESSAGES_PT: Record<string, string> = {
+  "A contact with this email already exists.": "Já existe um contato com este e-mail.",
+  "A contact with this phone already exists.": "Já existe um contato com este telefone.",
+};
+
+async function parseError(res: Response, fallback: string): Promise<string> {
+  const data = await res.json().catch(() => ({}));
+  const msg = typeof data?.error === "string" ? data.error : fallback;
+  return ERROR_MESSAGES_PT[msg] ?? msg;
+}
+
+export async function createContact(data: CreateContactData): Promise<Contact> {
   const res = await fetch(`${API_URL}/contacts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(_body),
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create contact");
+  if (!res.ok) throw new Error(await parseError(res, "Falha ao criar contato"));
   return res.json();
 }
 
-export async function updateContact(_id: string, _body: unknown): Promise<unknown> {
-  const res = await fetch(`${API_URL}/contacts/${_id}`, {
+export async function updateContact(id: string, data: CreateContactData): Promise<Contact> {
+  const res = await fetch(`${API_URL}/contacts/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(_body),
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update contact");
+  if (!res.ok) throw new Error(await parseError(res, "Falha ao atualizar contato"));
   return res.json();
 }
 
-export async function deleteContact(_id: string): Promise<unknown> {
-  const res = await fetch(`${API_URL}/contacts/${_id}`, { method: "DELETE" });
+export async function deleteContact(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/contacts/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete contact");
-  return res.json();
 }
 
 export async function getLeads(_params?: Record<string, string>): Promise<unknown> {

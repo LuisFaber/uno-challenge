@@ -19,7 +19,10 @@ describe("contacts.service", () => {
   describe("createContact", () => {
     it("returns object with id and createdAt", async () => {
       const mockResult = { affectedRows: 1 } as ResultSetHeader;
-      vi.mocked(pool.execute).mockResolvedValue([mockResult, []] as Awaited<ReturnType<typeof pool.execute>>);
+      vi.mocked(pool.execute)
+        .mockResolvedValueOnce([[], []] as Awaited<ReturnType<typeof pool.execute>>) // email check
+        .mockResolvedValueOnce([[], []] as Awaited<ReturnType<typeof pool.execute>>) // phone check
+        .mockResolvedValueOnce([mockResult, []] as Awaited<ReturnType<typeof pool.execute>>); // INSERT
 
       const data = {
         name: "Maria",
@@ -44,7 +47,10 @@ describe("contacts.service", () => {
   describe("updateContact", () => {
     it("returns null if not found", async () => {
       const mockResult = { affectedRows: 0 } as ResultSetHeader;
-      vi.mocked(pool.execute).mockResolvedValueOnce([mockResult, []] as Awaited<ReturnType<typeof pool.execute>>);
+      vi.mocked(pool.execute)
+        .mockResolvedValueOnce([[], []] as Awaited<ReturnType<typeof pool.execute>>) // email check
+        .mockResolvedValueOnce([[], []] as Awaited<ReturnType<typeof pool.execute>>) // phone check
+        .mockResolvedValueOnce([mockResult, []] as Awaited<ReturnType<typeof pool.execute>>); // UPDATE
 
       const result = await contactsService.updateContact("non-existent-id", {
         name: "Maria",
@@ -53,7 +59,7 @@ describe("contacts.service", () => {
       });
 
       expect(result).toBeNull();
-      expect(pool.execute).toHaveBeenCalledTimes(1);
+      expect(pool.execute).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -15,3 +15,7 @@ export function badRequest(c: Context, message: string) {
 export function notFound(c: Context, message: string) {
   return c.json({ error: message }, 404);
 }
+
+export function conflict(c: Context, message: string) {
+  return c.json({ error: message }, 409);
+}

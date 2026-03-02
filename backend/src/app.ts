@@ -1,11 +1,14 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { initDatabase } from "./db/init.js";
 import { contacts } from "./routes/contacts.routes.js";
 import { leads } from "./routes/leads.routes.js";
 
 const app = new Hono();
+
+app.use("*", cors({ origin: "*" }));
 
 app.get("/", (c) => {
   return c.json({ message: "Mini CRM API running" });
