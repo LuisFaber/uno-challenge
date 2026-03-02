@@ -6,5 +6,6 @@ const leads = new Hono();
 leads.get("/", leadsController.getLeads);
 leads.post("/", leadsController.createLead);
 leads.put("/:id", leadsController.updateLead);
+leads.delete("/:id", leadsController.deleteLead);
 
 export { leads };

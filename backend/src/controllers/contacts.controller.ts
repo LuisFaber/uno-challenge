@@ -31,3 +31,10 @@ export async function updateContact(c: Context) {
   if (!contact) return notFound(c, "Contact not found");
   return ok(c, contact);
 }
+
+export async function deleteContact(c: Context) {
+  const id = c.req.param("id");
+  const deleted = await contactsService.deleteContact(id);
+  if (!deleted) return notFound(c, "Contact not found");
+  return ok(c, { message: "Contact deleted successfully" });
+}

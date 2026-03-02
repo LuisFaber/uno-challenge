@@ -68,3 +68,12 @@ export async function updateContact(
   const row = rows[0];
   return row ? rowToContact(row) : null;
 }
+
+/** Deletes contact. Leads linked to this contact are removed by DB (FK ON DELETE CASCADE). */
+export async function deleteContact(id: string): Promise<boolean> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    "DELETE FROM contacts WHERE id = ?",
+    [id]
+  );
+  return result.affectedRows > 0;
+}

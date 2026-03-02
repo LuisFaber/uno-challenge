@@ -7,6 +7,7 @@ const contacts = new Hono();
 contacts.get("/", contactsController.getContacts);
 contacts.post("/", contactsController.createContact);
 contacts.put("/:id", contactsController.updateContact);
+contacts.delete("/:id", contactsController.deleteContact);
 contacts.get("/:contactId/leads", leadsController.getLeadsByContactId);
 
 export { contacts };
