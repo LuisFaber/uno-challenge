@@ -1,0 +1,26 @@
+services:
+  api:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - backend/.env.example
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: crm
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
