@@ -3,11 +3,10 @@ services:
     build: ./backend
     ports:
       - "3000:3000"
+    env_file:
+      - backend/.env.example
     environment:
       DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: crm
     depends_on:
       db:
         condition: service_healthy
@@ -20,7 +19,8 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
+      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
+      interval: 3s
       timeout: 5s
-      retries: 10
+      retries: 15
+      start_period: 10s
